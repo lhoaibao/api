@@ -1,14 +1,12 @@
 {
-  "type": "get",
-  "url": "https://www.googleapis.com",
-  "service_name": "youtube",
-  "service_version": "v3",
-  "resources": "search",
-  "method": "list",
+  "type": "post",
+  "url": "https://www.googleapis.com/youtube/v3",
+  "resources": "playlists",
+  "method": "insert",
   "params":{
-    "part": "snippet",
-    "maxResults": 1,
-    "q": "surfing",
-    "type": ""
-  }
+    "part": "snippet"
+  },
+  "body":{
+          "snippet": {"title": "haha"}
+        }
 }

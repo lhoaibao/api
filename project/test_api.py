@@ -3,6 +3,7 @@ import json
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 from google_auth_oauthlib.flow import InstalledAppFlow
+from requests_toolbelt.utils import dump
 
 
 def get_request():
@@ -22,28 +23,41 @@ def get_authenticated_service():
     return credentials.token
 
 
-def get_response(token, uri, param, type, content):
-    if type == 'get':
-        r = requests.get(url=uri, params=param,
-                         headers={'Authorization': 'Bearer %s' % token})
-    elif type == 'post':
-        r = requests.post(url=uri, params=param, data=content
-                         headers={'Authorization': 'Bearer %s' % token})
-    elif type == 'put':
-        r = requests.put(url=uri, params=param,
-                         headers={'Authorization': 'Bearer %s' % token})
-    elif type == 'delete':
-        r = requests.delete(url=uri, params=param,
-                         headers={'Authorization': 'Bearer %s' % token})
-    return r.json()
+def get_response(token, request):
+    method = {
+        "get": lambda url, params, body: requests.get(url=url, params=params,
+                         headers={'Authorization': 'Bearer %s' % token}),
+
+        "post": lambda url, params, body: requests.post(url=url, params=params, json=body,
+                         headers={'Authorization': 'Bearer %s' % token}),
+         "put": lambda url, params, body: requests.put(url=url, params=params, json=body,
+
+                         headers={'Authorization': 'Bearer %s' % token}),
+        "delete": lambda url, params, body: requests.delete(url=url, params=params,
+                         headers={'Authorization': 'Bearer %s' % token}),
+    }
+    func = method.get(request["type"], lambda url, params: exit("invalid method"))
+    try:
+        response = func(request['url'] + '/' + request['resources'], request["params"], request["body"])
+    except json.decoder.JSONDecodeError:
+        print("json file is wrong")
+        return
+    return response
+
+
+def main():
+    try:
+        request = get_request()
+    except json.decoder.JSONDecodeError:
+        print("json file is wrong")
+        return
+    client = get_authenticated_service()
+    response = get_response(client, request)
+    data = dump.dump_all(response)
+    print('Data:\n', data.decode('utf-8'))
 
 
 if __name__ == '__main__':
     CLIENT_SECRETS_FILE = "client_secret.json"
     SCOPES = 'https://www.googleapis.com/auth/youtube.force-ssl'
-
-    request = get_request()
-    client = get_authenticated_service()
-    url = request['url'] + '/' + request['service_name']+'/'+request['service_version']+'/'+request['resources']
-    response = get_response(client, url, request['params'], request['type'])
-    print(response)
+    main()
