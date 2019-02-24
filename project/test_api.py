@@ -42,7 +42,7 @@ def get_response(token, request):
     except json.decoder.JSONDecodeError:
         print("json file is wrong")
         return
-    return response
+    return response.text
 
 
 def main():
@@ -53,8 +53,8 @@ def main():
         return
     client = get_authenticated_service()
     response = get_response(client, request)
-    data = dump.dump_all(response)
-    print('Data:\n', data.decode('utf-8'))
+    with open('response.txt', 'wb') as f:
+        f.write(response.encode())
 
 
 if __name__ == '__main__':
