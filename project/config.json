@@ -1,0 +1,14 @@
+{
+  "type": "get",
+  "url": "https://www.googleapis.com",
+  "service_name": "youtube",
+  "service_version": "v3",
+  "resources": "search",
+  "method": "list",
+  "params":{
+    "part": "snippet",
+    "maxResults": 1,
+    "q": "surfing",
+    "type": ""
+  }
+}
